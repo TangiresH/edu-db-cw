@@ -1,155 +1,77 @@
 const express = require('express');
-const db = require('./database');
-const bodyParser = require('body-parser');
-
 const app = express();
-const port = 5000;
+const PORT = 5000;
+const mydb = require('./connect');
 
-app.use(bodyParser.json());
+app.use(express.json());
 
-app.get('/', (req, res) => {
-  db.query('SELECT * FROM files;', (err, files) => {
-    if (err) {
-      console.log(err);
-      res.status(500).send(err);
-      return;
-    }
+app.get('/all', (req, res) => {
+	const cmd = `SELECT * FROM markdown_INTENTION`;
 
-    if(files.length == 0) {
-      res.status(201).json({
-        message: "Table is empty"
-      });
-    }
-
-    res.status(201).json({ data: files });
-  })
+	mydb.query(cmd, (error, result) => {
+		if (error) return res.status(500).json(error);
+		res.status(200).json(result);
+	});
 });
 
-app.get('/:id', (req, res) => {
-  const {id} = req.params;
-  console.log(id);
-  db.query(`SELECT * FROM files WHERE file_id = ${id}`, (err, file) => {
-    if (err) {
-      console.log(err);
-      res.status(500).send(err);
-      return;
-    }
+app.get('/get', (req, res) => {
+	const cmd = `SELECT * FROM markdown_INTENTION`
+	+ ` WHERE markdown_id = ${req.query.id}`;
 
-    if (file.length == 0) {
-      console.log('There is no file with such id');
-      res.status(404).json({
-        message: 'There is no file with such id'
-      })
-      return;
-    }
-    console.log(file);
-    res.status(201).json({ data: file });
-  });
-})
+	mydb.query(cmd, (error, result) => {
+		if (error) return res.status(500).json(error);
+		res.status(200).json(result);
+	});
+});
 
-app.post('/', (req, res) => {
-  const {
-    file_id,
-    file_name,
-    admin_id,
-    branch1,
-    branch2,
-    original,
-    final_NER,
-    final_SEMANTIC,
-    final_INTENTION
-  } = req.body;
-  if (
-    file_id &&
-    file_name &&
-    admin_id &&
-    branch1 &&
-    branch2 &&
-    original &&
-    final_NER &&
-    final_SEMANTIC &&
-    final_INTENTION
-  ) {
-    db.query(`INSERT INTO files(file_id, file_name, admin_id, branch1, branch2, original, final_NER, final_SEMANTIC, final_INTENTION) VALUES("${file_id}", "${file_name}", "${admin_id}", "${branch1}", "${branch2}", "${original}", "${final_NER}", "${final_SEMANTIC}", "${final_INTENTION}")`, (err) => {
-      console.log(err);
-      res.status(500).json({
-        error: err
-      })
-      return;
-    });
+app.post('/new', (req, res) => {
+	const q = req.query;
+	if (!q.id || !q.ready || !q.not_ready || !q.status) {
+		return res.status(400).json({'error': 'You must follow the structure of the table!'});
+	}
 
-    res.status(201).send({msg: 'Created User' });
-  } else {
-    console.log('Wrong data provided');
-    res.json({
-      error: 'Wrong data provided'
-    });
-  }
-})
+	const cmd = `INSERT INTO markdown_INTENTION`
+	+ ` VALUES (${q.id}, ${q.ready},`
+	+ ` ${q.not_ready}, ${q.status})`;
 
-app.put('/:id', (req, res) => {
-  const {id} = req.params;
-  db.query(`SELECT * FROM files WHERE file_id = ${id}`, (err, [file]) => {
-    if (err) {
-      console.log(err);
-      res.status(500).json({
-        error: err
-      })
-      return;
-    }
-    
-    if (!file) {
-      res.status(500).json({ message: 'There is no such file'})
-      console.log('There is no file with such id');
-      return;
-    }
+	mydb.query(cmd, (error, result) => {
+		if (error) return res.status(500).json(error);
+		res.status(200).json({'show': 'Added a new row.'});
+	});
+});
 
-    let query = "UPDATE files SET ";
+app.put('/upd', (req, res) => {
+	const values = {
+		ready: 'partials_ready',
+		not_ready: 'partials_not_ready',
+		status: 'markdown_status'
+	};
 
-    for (key of Object.keys(file)) {
-      if (req.body[key]) {
-        query += `${key} = '${req.body[key]}'`;
-      }
-    }
-    query += `WHERE file_id = ${id}`;
-    db.query(query, (err) => {
-      if (err) {
-        console.log(err);
-        return;
-      }
+	for (const arg in values) {
+		if (req.query[arg]) {
+			const cmd = `UPDATE markdown_INTENTION`
+			+ ` SET ${values[arg]} = ${req.query[arg]}`
+			+ ` WHERE markdown_id = ${req.query.id}`;
 
-      res.status(201).send(`Changed lines ${Object.keys(req.body)} in file ${id}`);
-    })
-  }); 
-})
+			mydb.query(cmd, (error, result) => {
+				if (error) return res.status(500).json(error);
+				res.status(200).json({'show': 'Updated row'});
+			});
+		}
+	}
+});
 
-app.delete('/:id', (req, res) => {
-  const {id} = req.params;
+app.delete('/del', (req, res) => {
+	const cmd = `DELETE FROM markdown_INTENTION`
+	+ ` WHERE markdown_id = ${req.query.id}`;
 
-  db.query(`SELECT * FROM files WHERE file_id = ${id}`, (err, file) => {
-    if (err) {
-      console.log(err);
-      res.status(500).json({
-        error: err
-      })
-      return;
-    }
-    if (file.length == 0) {
-      res.status(404).json({ error: "There is no such user" });
-      return;
-    }
+	mydb.query(cmd, (error, result) => {
+		if (error) return res.status(500).json(error);
+		res.status(200).json({'show': 'Deleted row.'});
+	});
+});
 
-    db.query(`DELETE FROM files WHERE file_id = ${id}`, (err) => {
-      if (err) {
-        console.log(err);
-        res.status(404).json({ error: err });
-        return;
-      }
-      res.status(201).json({ message: `User ${id} deleted` });
-    })
-  })
-})
 
-app.listen(port, () => {
-  console.log(`Server now listening on port ${port}`);
-})
+app.listen(PORT, () => {
+	console.log(`Server now listening on port ${PORT}`);
+});

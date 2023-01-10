@@ -3,59 +3,52 @@
 Використовувався Postman 
 
 
-## Перший GET запит (порожня таблиця) 
+## Запит усіх рядків markdown_INTENTION:
 
 <p align="center">
-  <img src="./pic1.png">
+  <img src="./photo1.png">
 </p>
 
 
-## GET запит по неіснуючому id
-
+## Запит рядка по id:
 <p align="center">
-  <img src="./pic2.png">
-</p>
-
-
-## POST запит - спроба додавання рядка з недостатньою кількістю полів
-<p align="center">
-  <img src="./pic3.png">
+  <img src="./photo2.png">
 </p>
 
 
 ## POST запит - створення нового рядка
+<p align="center">
+  <img src="./photo3.png">
+</p>
+
+
+## POST запит - створення нового рядка з невірними даними
 
 <p align="center">
-  <img src="./pic4.png">
+  <img src="./photo4.png">
 </p>
 
 
 ## PUT запит - зміна поля певного рядка
 
 <p align="center">
-  <img src="./pic5.png">
+  <img src="./photo5.png">
 </p>
 
-
-## DELETE запит - спроба видалення неіснуючого рядка
+Результат:
 
 <p align="center">
-  <img src="./pic6.png">
+  <img src="./photo6.png">
 </p>
 
-
-## DELETE запит - успішне видалення рядка
+## DELETE запит - видалення рядка
 
 <p align="center">
-  <img src="./pic7.png">
+  <img src="./photo7.png">
 </p>
 
-
-## GET запит - підтвердження видалення рядка
+Результат:
 
 <p align="center">
-  <img src="./pic8.png">
+  <img src="./photo8.png">
 </p>
-
-
-
